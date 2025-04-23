@@ -101,7 +101,7 @@ PrivateData = @{
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/bkstar123/Bkstar123.PSModuleScaffolding'
 
         # A URL to an icon representing this module.
         # IconUri = ''
