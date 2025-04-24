@@ -1,26 +1,82 @@
-# Bkstar123.PSModuleScaffolding
-Bkstar123.PSModuleScaffolding is a reusable PowerShell module. Its purpose is to help you to quickly scaffold a PS module structure.
+
+# 📦 Bkstar123.PSModuleScaffolding
+
+**Bkstar123.PSModuleScaffolding** is a lightweight PowerShell module that helps you quickly scaffold a standard structure for a new PowerShell module project. It creates all the essential folders and files so you can start building your module following best practices right away.
 
 ---
 
-## 📦 Usage
+## 🚀 Features
+
+- Scaffold a clean and standard module structure: `Private`, `Public`, `Class`, and `Tests` folders.
+- Auto-generate `.psm1` and `.psd1` files.
+- Automatically exports public functions from the `Public` folder.
+- Lightweight, customizable, and easy to extend.
+
+---
+
+## 📥 Installation
+
+You can install this module either from the PowerShell Gallery (if published) or directly from GitHub.
+
+### From PowerShell Gallery
 
 ```powershell
-Install-Module Bkstar123.PSModuleScaffolding  
-Import-Module Bkstar123.PSModuleScaffolding  
-New-BksPSModule -ModuleName "Your_module_name"  
+Install-Module -Name Bkstar123.PSModuleScaffolding -Scope CurrentUser
 ```
 
-This command will scaffold your module structure into 4 folders **Private**, **Public**, **Class**, **Tests**, a root module file **.psm1**, and a module manifest file **.psd1**.  
+### From GitHub
 
-The **.psm1** file will do neccessary setup for your module, and export all public functions in **Public** folder for use. This is a basic setup, and you will still be required to update it for other types of exports such as variable, cmdlet and alias. 
+```powershell
+git clone https://github.com/bkstar123/Bkstar123.PSModuleScaffolding.git
+Import-Module ./Bkstar123.PSModuleScaffolding/Bkstar123.PSModuleScaffolding.psm1
+```
 
-+ Folder **Public** is for those components that you want to export for module users to use in their scripts.  
+---
 
-+ Folder **Private** is for those components that are internally used inside the module, and are not available for module users to use directly.  
+## 🛠️ Usage
 
-+ Folder **Class** is for class definitions that your module will use.  
+Once installed and imported, you can run the following command to scaffold a new module:
 
-+ Folder **Tests** is for unit testing cases that you want to implement for your module.  
+```powershell
+New-BksPSModule -ModuleName "YourModuleName"
+```
 
-Additionally, it also generate skeleton *.gitignore*, *README.md*, *LICENSE* files
+This will generate the following structure:
+
+```
+YourModuleName/
+├── Private/
+├── Public/
+├── Class/
+├── Tests/
+├── YourModuleName.psm1
+└── YourModuleName.psd1
+```
+
+- `Public/` contains public functions that will be exported automatically.
+- `Private/` contains internal helper functions.
+- `Class/` holds class definitions (if needed).
+- `Tests/` contains tests (Pester recommended).
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community!
+
+1. Fork the repository.
+2. Create a new branch for your feature or fix.
+3. Commit and push your changes.
+4. Open a Pull Request for review.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
+---
+
+## 🌟 Thanks
+
+Thanks for checking out **Bkstar123.PSModuleScaffolding**! If you find this project useful, please consider giving it a ⭐ on GitHub.
