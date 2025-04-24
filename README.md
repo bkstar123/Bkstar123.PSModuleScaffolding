@@ -9,6 +9,7 @@ Bkstar123.PSModuleScaffolding is a reusable PowerShell module. Its purpose is to
 Install-Module Bkstar123.PSModuleScaffolding  
 Import-Module Bkstar123.PSModuleScaffolding  
 New-BksPSModule -ModuleName "Your_module_name"  
+```
 
 This command will scaffold your module structure into 4 folders **Private**, **Public**, **Class**, **Tests**, a root module file **.*psm1**, and a module manifest file **.psd1**.  
 
