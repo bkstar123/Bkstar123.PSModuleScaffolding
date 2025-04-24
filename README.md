@@ -22,6 +22,7 @@ You can install this module either from the PowerShell Gallery (if published) or
 
 ```powershell
 Install-Module -Name Bkstar123.PSModuleScaffolding -Scope CurrentUser
+Import-Module Bkstar123.PSModuleScaffolding
 ```
 
 ### From GitHub
