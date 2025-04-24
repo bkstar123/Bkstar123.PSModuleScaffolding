@@ -1,7 +1,7 @@
-    *.ps1xml
-    *.user
-    *.suo
-    *.log
-    *.nupkg
-    .vscode/
-    .idea/
+*.ps1xml
+*.user
+*.suo
+*.log
+*.nupkg
+.vscode/
+.idea/
