@@ -28,7 +28,7 @@ Install-Module -Name Bkstar123.PSModuleScaffolding -Scope CurrentUser
 
 ```powershell
 git clone https://github.com/bkstar123/Bkstar123.PSModuleScaffolding.git
-Import-Module ./Bkstar123.PSModuleScaffolding/Bkstar123.PSModuleScaffolding.psm1
+Import-Module ./Bkstar123.PSModuleScaffolding/Bkstar123.PSModuleScaffolding.psd1
 ```
 
 ---
