@@ -1,0 +1,34 @@
+{
+    "type": "azure",
+    "description": "Template for Azure PowerShell modules",
+    "files": {
+        "Public": [
+            {
+                "name": "Connect-AzureService.ps1",
+                "content": "function Connect-AzureService {\n    [CmdletBinding()]\n    param(\n        [Parameter(Mandatory = $true)]\n        [string]$TenantId,\n        [Parameter(Mandatory = $true)]\n        [string]$SubscriptionId\n    )\n\n    # Function implementation\n}"
+            }
+        ],
+        "Private": [
+            {
+                "name": "Initialize-AzureContext.ps1",
+                "content": "function Initialize-AzureContext {\n    [CmdletBinding()]\n    param()\n    # Function implementation\n}"
+            }
+        ],
+        "Classes": [
+            {
+                "name": "AzureResourceManager.ps1",
+                "content": "class AzureResourceManager {\n    # Class implementation\n}"
+            }
+        ],
+        "Tests": [
+            {
+                "name": "Connect-AzureService.Tests.ps1",
+                "content": "Describe 'Connect-AzureService' {\n    It 'Should connect to Azure' {\n        # Test implementation\n    }\n}"
+            }
+        ]
+    },
+    "dependencies": [
+        "Az.Accounts",
+        "Az.Resources"
+    ]
+} 

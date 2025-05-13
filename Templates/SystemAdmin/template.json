@@ -1,0 +1,41 @@
+{
+    "type": "systemadmin",
+    "description": "Template for System Administration PowerShell modules",
+    "files": {
+        "Public": [
+            {
+                "name": "Get-SystemInfo.ps1",
+                "content": "function Get-SystemInfo {\n    [CmdletBinding()]\n    param()\n    \n    $computerSystem = Get-CimInstance -ClassName Win32_ComputerSystem\n    $operatingSystem = Get-CimInstance -ClassName Win32_OperatingSystem\n    $processor = Get-CimInstance -ClassName Win32_Processor\n    $memory = Get-CimInstance -ClassName Win32_PhysicalMemory\n    \n    [PSCustomObject]@{\n        ComputerName = $computerSystem.Name\n        Manufacturer = $computerSystem.Manufacturer\n        Model = $computerSystem.Model\n        OperatingSystem = $operatingSystem.Caption\n        OSVersion = $operatingSystem.Version\n        Processor = $processor.Name\n        TotalMemoryGB = [math]::Round(($memory | Measure-Object -Property Capacity -Sum).Sum / 1GB, 2)\n    }\n}"
+            },
+            {
+                "name": "Test-DiskSpace.ps1",
+                "content": "function Test-DiskSpace {\n    [CmdletBinding()]\n    param(\n        [Parameter()]\n        [int]$WarningThreshold = 20,\n        \n        [Parameter()]\n        [int]$CriticalThreshold = 10\n    )\n    \n    Get-CimInstance -ClassName Win32_LogicalDisk |\n        Where-Object DriveType -eq 3 |\n        Select-Object DeviceID,\n            @{N='Size(GB)';E={[math]::Round($_.Size/1GB,2)}},\n            @{N='FreeSpace(GB)';E={[math]::Round($_.FreeSpace/1GB,2)}},\n            @{N='FreeSpace(%)';E={[math]::Round(($_.FreeSpace/$_.Size)*100,2)}}\n}"
+            }
+        ],
+        "Private": [
+            {
+                "name": "Write-Log.ps1",
+                "content": "function Write-Log {\n    [CmdletBinding()]\n    param(\n        [Parameter(Mandatory = $true)]\n        [string]$Message,\n        \n        [Parameter()]\n        [ValidateSet('Information','Warning','Error')]\n        [string]$Level = 'Information',\n        \n        [Parameter()]\n        [string]$LogPath = \"$env:TEMP\\SystemAdmin.log\"\n    )\n    \n    $logEntry = \"[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] [$Level] $Message\"\n    Add-Content -Path $LogPath -Value $logEntry\n    Write-Verbose $logEntry\n}"
+            }
+        ],
+        "Classes": [
+            {
+                "name": "SystemMonitor.ps1",
+                "content": "class SystemMonitor {\n    [string]$ComputerName\n    [datetime]$LastCheck\n    [hashtable]$Metrics\n    \n    SystemMonitor([string]$computerName) {\n        $this.ComputerName = $computerName\n        $this.Metrics = @{}\n        $this.Update()\n    }\n    \n    [void]Update() {\n        $this.LastCheck = Get-Date\n        $this.Metrics.CPU = (Get-Counter '\\Processor(_Total)\\% Processor Time').CounterSamples.CookedValue\n        $this.Metrics.Memory = (Get-Counter '\\Memory\\Available MBytes').CounterSamples.CookedValue\n    }\n    \n    [string]ToString() {\n        return \"$($this.ComputerName) - Last Check: $($this.LastCheck)\"\n    }\n}"
+            }
+        ],
+        "Tests": [
+            {
+                "name": "Get-SystemInfo.Tests.ps1",
+                "content": "Describe 'Get-SystemInfo' {\n    It 'Should return system information' {\n        $info = Get-SystemInfo\n        $info | Should -Not -BeNullOrEmpty\n        $info.ComputerName | Should -Not -BeNullOrEmpty\n    }\n}"
+            },
+            {
+                "name": "Test-DiskSpace.Tests.ps1",
+                "content": "Describe 'Test-DiskSpace' {\n    It 'Should return disk space information' {\n        $diskSpace = Test-DiskSpace\n        $diskSpace | Should -Not -BeNullOrEmpty\n    }\n}"
+            }
+        ]
+    },
+    "dependencies": [
+        "CimCmdlets"
+    ]
+} 

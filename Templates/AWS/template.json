@@ -1,0 +1,34 @@
+{
+    "type": "aws",
+    "description": "Template for AWS PowerShell modules",
+    "files": {
+        "Public": [
+            {
+                "name": "Connect-AWSService.ps1",
+                "content": "function Connect-AWSService {\n    [CmdletBinding()]\n    param(\n        [Parameter(Mandatory = $true)]\n        [string]$AccessKey,\n        [Parameter(Mandatory = $true)]\n        [string]$SecretKey,\n        [Parameter()]\n        [string]$Region = 'us-east-1'\n    )\n\n    # Function implementation\n}"
+            }
+        ],
+        "Private": [
+            {
+                "name": "Initialize-AWSContext.ps1",
+                "content": "function Initialize-AWSContext {\n    [CmdletBinding()]\n    param()\n    # Function implementation\n}"
+            }
+        ],
+        "Classes": [
+            {
+                "name": "AWSResourceManager.ps1",
+                "content": "class AWSResourceManager {\n    # Class implementation\n}"
+            }
+        ],
+        "Tests": [
+            {
+                "name": "Connect-AWSService.Tests.ps1",
+                "content": "Describe 'Connect-AWSService' {\n    It 'Should connect to AWS' {\n        # Test implementation\n    }\n}"
+            }
+        ]
+    },
+    "dependencies": [
+        "AWS.Tools.Common",
+        "AWS.Tools.S3"
+    ]
+} 

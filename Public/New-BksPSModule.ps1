@@ -1,136 +1,158 @@
 function New-BksPSModule {
-    param (
+    [CmdletBinding()]
+    param(
         [Parameter(Mandatory = $true)]
-        [string]$ModuleName
+        [string]$ModuleName,
+        
+        [Parameter()]
+        [string]$OutputPath = (Get-Location)
     )
-    $Author = Read-Host "Enter the author of the module (required)"
-    $Description = Read-Host "Enter a description for the module (required)"
-    $Version = Read-Host "Enter the version of the module (required)"
-
-    $basePath = Join-Path -Path (Get-Location) -ChildPath $ModuleName
-    $folders = @("Public", "Private", "Classes", "Tests")
     
-    # Create module folder structure
-    if (-not (Test-Path $basePath)) {
-        New-Item -ItemType Directory -Path $basePath | Out-Null
-        foreach ($folder in $folders) {
-            New-Item -ItemType Directory -Path (Join-Path $basePath $folder) | Out-Null
+    process {
+        try {
+            # Create module directory
+            $modulePath = Join-Path $OutputPath $ModuleName
+            New-Item -Path $modulePath -ItemType Directory -Force | Out-Null
+            
+            # Create all required directories
+            $directories = @(
+                'Public',      # Public functions
+                'Private',     # Private functions
+                'Class',       # Class definitions
+                'Tests',       # Pester tests
+                'docs',        # Documentation
+                'en-US',      # Localized help files
+                '.github\workflows', # GitHub Actions
+                'analysis'     # Code analysis reports
+            )
+            
+            foreach ($dir in $directories) {
+                $path = Join-Path $modulePath $dir
+                New-Item -Path $path -ItemType Directory -Force | Out-Null
+            }
+            
+            # Create module manifest
+            $manifestPath = Join-Path $modulePath "$ModuleName.psd1"
+            $manifestParams = @{
+                Path = $manifestPath
+                RootModule = "$ModuleName.psm1"
+                ModuleVersion = '0.1.0'
+                Author = $env:USERNAME
+                Description = "PowerShell module created with Bkstar123.PSModuleScaffolding"
+                PowerShellVersion = '5.1'
+                FunctionsToExport = @()
+                CompatiblePSEditions = @('Desktop', 'Core')
+            }
+            New-ModuleManifest @manifestParams
+            
+            # Create module file
+            $moduleContent = @'
+# Dot source public and private functions
+$Public = @(Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction SilentlyContinue)
+$Private = @(Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction SilentlyContinue)
+$Classes = @(Get-ChildItem -Path $PSScriptRoot\Class\*.ps1 -ErrorAction SilentlyContinue)
+
+# Dot source classes first
+foreach ($class in $Classes) {
+    try {
+        . $class.FullName
+    }
+    catch {
+        Write-Error "Failed to import class $($class.FullName): $_"
+    }
+}
+
+# Dot source private functions
+foreach ($function in $Private) {
+    try {
+        . $function.FullName
+    }
+    catch {
+        Write-Error "Failed to import function $($function.FullName): $_"
+    }
+}
+
+# Dot source public functions
+foreach ($function in $Public) {
+    try {
+        . $function.FullName
+    }
+    catch {
+        Write-Error "Failed to import function $($function.FullName): $_"
+    }
+}
+
+# Export public functions
+Export-ModuleMember -Function $Public.BaseName
+'@
+            Set-Content -Path (Join-Path $modulePath "$ModuleName.psm1") -Value $moduleContent
+            
+            # Create initial CHANGELOG.md
+            $changelogContent = @'
+# Changelog
+All notable changes to this module will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.0] - $(Get-Date -Format "yyyy-MM-dd")
+### Added
+- Initial release
+'@
+            Set-Content -Path (Join-Path $modulePath "CHANGELOG.md") -Value $changelogContent
+            
+            # Create initial GitHub workflow
+            $workflowPath = Join-Path $modulePath ".github\workflows\test.yml"
+            $workflowContent = @'
+name: Test PowerShell Module
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Install Pester
+      shell: pwsh
+      run: |
+        Install-Module Pester -MinimumVersion 5.0.0 -Force -SkipPublisherCheck
+        
+    - name: Run Tests
+      shell: pwsh
+      run: |
+        Import-Module Pester -MinimumVersion 5.0.0
+        $config = @{
+            Run = @{
+                Path = "./Tests"
+            }
+            Output = @{
+                Verbosity = "Detailed"
+            }
+        }
+        Invoke-Pester -Configuration $config
+'@
+            New-Item -Path $workflowPath -ItemType File -Force
+            Set-Content -Path $workflowPath -Value $workflowContent
+            
+            Write-Host "Successfully created module scaffold at $modulePath" -ForegroundColor Green
+            Write-Host "Next steps:" -ForegroundColor Yellow
+            Write-Host "1. Add your functions to the Public and Private folders" -ForegroundColor Yellow
+            Write-Host "2. Update the module manifest (FunctionsToExport, etc.)" -ForegroundColor Yellow
+            Write-Host "3. Add tests to the Tests folder" -ForegroundColor Yellow
+            Write-Host "4. Update documentation in the docs folder" -ForegroundColor Yellow
+        }
+        catch {
+            Write-Error "Failed to create module scaffold: $_"
         }
     }
-
-    # Create Private function to get functions from file
-    $privateFunc = @'
-function Get-FunctionsFromFile {
-    param (
-        [string]$Path
-    )
-
-    if (-not (Test-Path $Path)) {
-        # Write-Warning "File not found: $Path"
-        return @()
-    }
-
-    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$null, [ref]$null)
-
-    return $ast.FindAll({
-        param ($node)
-        $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
-    }, $false) | ForEach-Object {
-        $_.Name
-    }
-}
-'@
-    Set-Content -Path (Join-Path $basePath (Join-Path "Private" "Get-FunctionsFromFile.ps1")) -Value $privateFunc
-
-    # Create file .psm1
-    $psm1 = @'
-# Dot-source all scripts in Classes, Private, and Public folders
-$ClassPath = Join-Path -Path $PSScriptRoot -ChildPath 'Classes'
-$PrivatePath = Join-Path -Path $PSScriptRoot -ChildPath 'Private'
-$PublicPath = Join-Path -Path $PSScriptRoot -ChildPath 'Public'
-
-if (Test-Path $ClassPath) {
-    Get-ChildItem -Path (Join-Path $ClassPath "*.ps1") -Recurse -File | ForEach-Object { . $_.FullName }
-}
-
-if (Test-Path $PrivatePath) {
-    Get-ChildItem -Path (Join-Path $PrivatePath "*.ps1") -Recurse -File | ForEach-Object { . $_.FullName }
-}
-
-$publicFunctions = @()
-if (Test-Path $PublicPath) {
-    Get-ChildItem -Path (Join-Path $PublicPath "*.ps1") -Recurse -File | ForEach-Object { 
-        . $_.FullName 
-        $publicFunctions += Get-FunctionsFromFile -Path $_.FullName
-    }
-} 
-# Export only functions from Public
-Export-ModuleMember -Function $publicFunctions
-'@
-    Set-Content -Path (Join-Path $basePath "$ModuleName.psm1") -Value $psm1
-    
-    # Create File manifest .psd1
-    New-ModuleManifest -Path (Join-Path $basePath "$ModuleName.psd1") `
-        -RootModule "$ModuleName.psm1" `
-        -Author "$Author" `
-        -Description "$Description" `
-        -ModuleVersion "$Version" `
-        -FunctionsToExport '*' `
-    
-    # Create Example public function
-    $func = @'
-function DoSomething {
-    [CmdletBinding()]
-    param (
-        [string]$message = "example action"
-    )
-    return "Do $message"
-}
-'@
-    Set-Content -Path (Join-Path $basePath (Join-Path "Public" "DoSomething.ps1")) -Value $func
-    
-    # Create Test with Pester
-    $test = @"
-Describe "$ModuleName - DoSomething" {
-    It "Should display properly" {
-        . (Join-Path (Join-Path `$PSScriptRoot "..") $ModuleName.psm1)
-        (DoSomething) | Should -Be "Do example action"
-    }
-}
-"@
-    Set-Content -Path (Join-Path $basePath (Join-Path "Tests" "DoSomething.Test.ps1")) -Value $test
-    
-    # Create README.md
-    $readme = @"
-# $ModuleName
-    
-A reusable PowerShell module.
-    
-## Usage
-    
-```powershell
-Import-Module .\$ModuleName\$ModuleName.psd1
-DoSomething
-"@
-    Set-Content -Path (Join-Path $basePath "README.md") -Value $readme
-
-    # Create .gitignore (Simplified for PS module)
-    $gitignore = @"
-*.ps1xml
-*.user
-*.suo
-*.log
-*.nupkg
-.vscode/
-.idea/
-"@
-    Set-Content -Path (Join-Path $basePath ".gitignore") -Value $gitignore 
-    
-    # Create License file
-    $license = @" 
-MIT License
-Copyright (c) $(Get-Date -Format yyyy)
-Permission is hereby granted, free of charge, to any person obtaining a copy... 
-"@ 
-    Set-Content -Path (Join-Path $basePath "LICENSE") -Value $license   
 }

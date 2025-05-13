@@ -12,28 +12,28 @@
 RootModule = 'Bkstar123.PSModuleScaffolding.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '0.2.0'
 
 # Supported PSEditions
-# CompatiblePSEditions = @()
+CompatiblePSEditions = @('Desktop', 'Core')
 
 # ID used to uniquely identify this module
-GUID = '8eb37562-b82c-4311-862f-edd54e168038'
+GUID = '12345678-1234-1234-1234-123456789012'
 
 # Author of this module
-Author = 'tuanha'
+Author = 'bkstar123'
 
 # Company or vendor of this module
-# CompanyName = ''
+CompanyName = 'bkstar123'
 
 # Copyright statement for this module
-Copyright = '(c) TuanHa. All rights reserved.'
+Copyright = '(c) 2023 bkstar123. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'This moodule is used to create a new PowerShell module scaffolding.'
+Description = 'A PowerShell module that helps you quickly scaffold a standard structure for a new PowerShell module project with best practices.'
 
 # Minimum version of the PowerShell engine required by this module
-# PowerShellVersion = ''
+PowerShellVersion = '5.1'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -69,7 +69,15 @@ Description = 'This moodule is used to create a new PowerShell module scaffoldin
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = '*'
+FunctionsToExport = @(
+    'New-BksPSModule',
+    'New-BksPSModuleFromTemplate',
+    'New-BksPSModuleDocumentation',
+    'New-BksPSModuleTest',
+    'Test-BksPSModuleQuality',
+    'Update-BksPSModuleVersion',
+    'Publish-BksPSModule'
+)
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'
@@ -95,10 +103,10 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('scaffolding', 'module', 'powershell')
+        Tags = @('PowerShell', 'Module', 'Scaffold', 'Template', 'Development')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/bkstar123/Bkstar123.PSModuleScaffolding/blob/master/LICENSE'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/bkstar123/Bkstar123.PSModuleScaffolding'
@@ -107,7 +115,15 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = @'
+## 0.2.0
+- Added template system for different module types
+- Added documentation generator with PlatyPS integration
+- Added testing framework with Pester integration
+- Added module validation with PSScriptAnalyzer
+- Added version management system
+- Added module publishing capabilities
+'@
 
         # Prerelease string of this module
         # Prerelease = ''
